@@ -122,6 +122,12 @@
 			<artifactId>opencsv</artifactId>
 			<version>5.12.0</version>
 		</dependency>
+
+		<!-- Redis – caching via Lettuce (included transitively) -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-redis</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>

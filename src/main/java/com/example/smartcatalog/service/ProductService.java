@@ -9,6 +9,8 @@ import com.example.smartcatalog.repository.CategoryRepository;
 import com.example.smartcatalog.repository.ProductRepository;
 import com.opencsv.CSVReaderHeaderAware;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -56,6 +58,7 @@ public class ProductService {
      * @param pageable page number, size, and optional sort (e.g. {@code ?page=0&size=10&sort=name,asc})
      * @return a {@link Page} of {@link ProductDto} objects
      */
+    @Cacheable(value = "products", key = "#pageable.pageNumber + '-' + #pageable.pageSize + '-' + #pageable.sort")
     @Transactional(readOnly = true)
     public Page<ProductDto> getAllProducts(Pageable pageable) {
         return productRepository.findAll(pageable)
@@ -69,6 +72,7 @@ public class ProductService {
      * @return the matching {@link ProductDto}
      * @throws ResourceNotFoundException if no product with the given {@code id} exists
      */
+    @Cacheable(value = "products", key = "'id-' + #id")
     @Transactional(readOnly = true)
     public ProductDto getProductById(Long id) {
         Product product = productRepository.findById(id)
@@ -91,6 +95,7 @@ public class ProductService {
      * @return the saved product as a {@link ProductDto} (includes generated {@code id})
      * @throws ResourceNotFoundException if the supplied category id does not exist
      */
+    @CacheEvict(value = "products", allEntries = true)
     @Transactional
     public ProductDto createProduct(ProductDto dto) {
         Product product = productMapper.toEntity(dto);
@@ -109,6 +114,7 @@ public class ProductService {
      * @throws ResourceNotFoundException if no product with the given {@code id} exists,
      *                                   or if the supplied category id does not exist
      */
+    @CacheEvict(value = "products", allEntries = true)
     @Transactional
     public ProductDto updateProduct(Long id, ProductDto dto) {
         Product existing = productRepository.findById(id)
