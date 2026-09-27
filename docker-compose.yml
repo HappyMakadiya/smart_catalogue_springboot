@@ -1,0 +1,48 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: pgvector-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: db_user
+      POSTGRES_PASSWORD: db_password
+      POSTGRES_DB: spring_db
+    volumes:
+      - pgdata:/var/lib/postgresql/data  # <-- Mounts the named volume to Postgres data dir
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U db_user -d spring_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: redis-cache
+    ports:
+      - "6379:6379"
+    command: redis-server --save 60 1 --loglevel warning # <-- Tells Redis to save data to disk every 60s
+    volumes:
+      - redisdata:/data  # <-- Mounts the named volume to Redis data dir
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+
+  # --- NEW: Web-based Database UI ---
+  adminer:
+    image: adminer
+    container_name: db-adminer
+    ports:
+      - "8081:8080" # Exposed on port 8081 to avoid conflict with Spring Boot (8080)
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+# Declare the named volumes at the bottom of the file
+volumes:
+  pgdata:
+  redisdata:
