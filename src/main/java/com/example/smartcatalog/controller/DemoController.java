@@ -1,5 +1,7 @@
 package com.example.smartcatalog.controller;
 
+import com.example.smartcatalog.dto.ApiResponse;
+import com.example.smartcatalog.util.ApiResponseUtil;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,6 +26,8 @@ import java.util.Map;
  *
  * <p>Try calling these <strong>without</strong> a token — you'll get a {@code 403 Forbidden}.
  * Include {@code Authorization: Bearer <token>} and you'll get back your profile data.
+ *
+ * <p>All responses use the unified {@link ApiResponse} envelope.
  */
 @RestController
 @RequestMapping("/api")
@@ -39,14 +43,16 @@ public class DemoController {
      * @return username and authorities extracted from the token-backed UserDetails
      */
     @GetMapping("/profile")
-    public ResponseEntity<Map<String, Object>> getProfile(
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getProfile(
             @AuthenticationPrincipal UserDetails userDetails) {
 
-        return ResponseEntity.ok(Map.of(
-                "username", userDetails.getUsername(),
+        Map<String, Object> profile = Map.of(
+                "username",    userDetails.getUsername(),
                 "authorities", userDetails.getAuthorities(),
-                "message", "You are authenticated! This data was loaded by CustomUserDetailsService."
-        ));
+                "info",        "Data loaded by CustomUserDetailsService."
+        );
+
+        return ApiResponseUtil.ok("Profile fetched successfully", profile);
     }
 
     /**
@@ -56,12 +62,14 @@ public class DemoController {
      * @return a greeting with the username
      */
     @GetMapping("/hello")
-    public ResponseEntity<Map<String, String>> hello(
+    public ResponseEntity<ApiResponse<Map<String, String>>> hello(
             @AuthenticationPrincipal UserDetails userDetails) {
 
-        return ResponseEntity.ok(Map.of(
+        Map<String, String> greeting = Map.of(
                 "greeting", "Hello, " + userDetails.getUsername() + "! 🚀",
-                "info", "If you can see this, your JWT is valid and the security chain is working."
-        ));
+                "info",     "If you can see this, your JWT is valid and the security chain is working."
+        );
+
+        return ApiResponseUtil.ok("Hello fetched successfully", greeting);
     }
 }

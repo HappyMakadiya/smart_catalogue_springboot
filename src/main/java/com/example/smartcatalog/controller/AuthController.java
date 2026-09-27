@@ -1,11 +1,15 @@
 package com.example.smartcatalog.controller;
 
+import com.example.smartcatalog.dto.ApiResponse;
 import com.example.smartcatalog.dto.AuthResponse;
 import com.example.smartcatalog.dto.LoginRequest;
 import com.example.smartcatalog.dto.RegisterRequest;
+import com.example.smartcatalog.exception.custom.AuthenticationFailedException;
+import com.example.smartcatalog.exception.custom.DuplicateResourceException;
 import com.example.smartcatalog.model.User;
 import com.example.smartcatalog.repository.UserRepository;
 import com.example.smartcatalog.security.JwtUtil;
+import com.example.smartcatalog.util.ApiResponseUtil;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Public authentication endpoints — no JWT required.
  *
- * <p>Demonstrates the full flow:
+ * <p>All responses follow the unified {@link ApiResponse} envelope:
  * <ol>
  *   <li>{@code POST /auth/register} — creates a new user in the DB
  *       (password stored as BCrypt hash) and returns a JWT.</li>
@@ -68,18 +72,15 @@ public class AuthController {
      * </ol>
      *
      * @param request the registration payload (username + password)
-     * @return 201 with JWT, or 409 if the username is taken
+     * @return 201 with JWT inside {@link ApiResponse}, or 409 if the username is taken
      */
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
+    public ResponseEntity<ApiResponse<AuthResponse>> register(
+            @Valid @RequestBody RegisterRequest request) {
 
         // Duplicate-username guard
         if (userRepository.findByUsername(request.getUsername()).isPresent()) {
-            return ResponseEntity
-                    .status(HttpStatus.CONFLICT)
-                    .body(AuthResponse.builder()
-                            .message("Username '" + request.getUsername() + "' is already taken")
-                            .build());
+            throw new DuplicateResourceException("User", "username", request.getUsername());
         }
 
         // Build and persist the user
@@ -93,12 +94,12 @@ public class AuthController {
         // Generate JWT so the client is logged-in immediately
         String token = jwtUtil.generateToken(user);
 
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(AuthResponse.builder()
-                        .token(token)
-                        .message("User registered successfully")
-                        .build());
+        AuthResponse authResponse = AuthResponse.builder()
+                .token(token)
+                .message("User registered successfully")
+                .build();
+
+        return ApiResponseUtil.success("User registered successfully", authResponse, HttpStatus.CREATED);
     }
 
     // -------------------------------------------------------------------------
@@ -113,10 +114,12 @@ public class AuthController {
      * to load the user from the database and compares the BCrypt-encoded password.
      *
      * @param request the login payload (username + password)
-     * @return 200 with JWT, or 401 if credentials are invalid
+     * @return 200 with JWT inside {@link ApiResponse}, or 401 if credentials are invalid
      */
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<ApiResponse<AuthResponse>> login(
+            @Valid @RequestBody LoginRequest request) {
+
         try {
             // This call triggers CustomUserDetailsService.loadUserByUsername()
             authenticationManager.authenticate(
@@ -126,22 +129,18 @@ public class AuthController {
                     )
             );
         } catch (BadCredentialsException e) {
-            return ResponseEntity
-                    .status(HttpStatus.UNAUTHORIZED)
-                    .body(AuthResponse.builder()
-                            .message("Invalid username or password")
-                            .build());
+            throw new AuthenticationFailedException("Invalid username or password");
         }
 
         // Authentication passed — load UserDetails and generate token
         UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
         String token = jwtUtil.generateToken(userDetails);
 
-        return ResponseEntity.ok(
-                AuthResponse.builder()
-                        .token(token)
-                        .message("Login successful")
-                        .build()
-        );
+        AuthResponse authResponse = AuthResponse.builder()
+                .token(token)
+                .message("Login successful")
+                .build();
+
+        return ApiResponseUtil.ok("Login successful", authResponse);
     }
 }
