@@ -7,11 +7,20 @@ import com.example.smartcatalog.model.Category;
 import com.example.smartcatalog.model.Product;
 import com.example.smartcatalog.repository.CategoryRepository;
 import com.example.smartcatalog.repository.ProductRepository;
+import com.opencsv.CSVReaderHeaderAware;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Business logic for the product catalogue.
@@ -133,5 +142,32 @@ public class ProductService {
         } else {
             product.setCategory(null);
         }
+    }
+
+
+    public void seedCategoriesFromCsv(MultipartFile file) throws Exception {
+        List<Product> products = new ArrayList<>();
+
+        try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(file.getInputStream(), "UTF-8"));
+             CSVReaderHeaderAware csvReader = new CSVReaderHeaderAware(fileReader)) {
+
+            Map<String, String> values;
+            while ((values = csvReader.readMap()) != null) {
+                // 1. Get a proxy reference to the existing Category
+                Category categoryProxy = categoryRepository.getReferenceById(Long.valueOf(values.get("category_id")));
+
+                Product product = Product.builder()
+                        .name(values.get("name"))
+                        .description(values.get("description"))
+                        .price(new BigDecimal(values.get("price")))
+                        .stock(Integer.valueOf(values.get("stock")))
+                        .category(categoryProxy)
+                        .build();
+                products.add(product);
+            }
+        }
+
+        // Save all records efficiently to the database
+        productRepository.saveAll(products);
     }
 }

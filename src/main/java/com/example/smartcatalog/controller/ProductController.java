@@ -13,6 +13,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
 
@@ -150,4 +151,22 @@ public class ProductController {
                 Map.of("product", updated)
         );
     }
+
+
+    @PostMapping("/seed")
+    public ResponseEntity<String> seedCategories(@RequestParam("file") MultipartFile file) {
+        if (file.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Please upload a valid CSV file.");
+        }
+
+        try {
+            service.seedCategoriesFromCsv(file);
+            return ResponseEntity.status(HttpStatus.OK).body("CSV data successfully seeded into the database!");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to seed data: " + e.getMessage());
+        }
+    }
+
 }
+
