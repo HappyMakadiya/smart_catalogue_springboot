@@ -45,6 +45,12 @@ public class ProductService {
     @Autowired
     private ProductMapper productMapper;
 
+    @Autowired
+    private ProductEmbeddingService productEmbeddingService;
+
+    @Autowired
+    private org.springframework.ai.embedding.EmbeddingModel embeddingModel;
+
     // -----------------------------------------------------------------------
     // Read
     // -----------------------------------------------------------------------
@@ -80,6 +86,37 @@ public class ProductService {
         return productMapper.toDto(product);
     }
 
+    /**
+     * Semantic search for products using their embeddings.
+     *
+     * @param query the search string (e.g. "wireless headphones")
+     * @param maxPrice optional upper limit for the product price
+     * @return top 10 products sorted by semantic similarity to the query
+     */
+    @Transactional(readOnly = true)
+    public List<ProductDto> searchProducts(String query, BigDecimal maxPrice) {
+        // 1. Convert user text query into an embedding vector using the AI model
+        float[] queryVector = embeddingModel.embed(query);
+        
+        // 2. Format float[] as a pgvector string literal (e.g. "[0.1, 0.2, ...]")
+        // We reuse the same format logic needed by the native SQL query parameter.
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < queryVector.length; i++) {
+            sb.append(queryVector[i]);
+            if (i < queryVector.length - 1) sb.append(',');
+        }
+        sb.append(']');
+        String vectorStr = sb.toString();
+
+        // 3. Delegate to repository for vector cosine similarity search
+        List<Product> products = productRepository.searchBySimilarityAndPrice(vectorStr, maxPrice);
+
+        // 4. Map to DTOs
+        return products.stream()
+                .map(productMapper::toDto)
+                .toList();
+    }
+
     // -----------------------------------------------------------------------
     // Write
     // -----------------------------------------------------------------------
@@ -101,6 +138,8 @@ public class ProductService {
         Product product = productMapper.toEntity(dto);
         resolveCategory(dto, product);
         Product saved = productRepository.save(product);
+        // Fire-and-forget: runs on a background thread after this transaction commits
+        productEmbeddingService.embedAndSave(saved.getId());
         return productMapper.toDto(saved);
     }
 
@@ -122,6 +161,8 @@ public class ProductService {
         productMapper.updateEntityFromDto(dto, existing);
         resolveCategory(dto, existing);
         Product saved = productRepository.save(existing);
+        // Re-embed because name, category, or description may have changed
+        productEmbeddingService.embedAndSave(saved.getId());
         return productMapper.toDto(saved);
     }
 

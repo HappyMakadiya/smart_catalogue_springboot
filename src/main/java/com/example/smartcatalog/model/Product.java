@@ -1,5 +1,6 @@
 package com.example.smartcatalog.model;
 
+import com.example.smartcatalog.config.VectorFloatConverter;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
@@ -55,5 +56,15 @@ public class Product {
     @Column(nullable = false)
     @Builder.Default
     private Long version = 0L; // Enables Optimistic Locking
+
+    /**
+     * Semantic embedding vector produced by Gemini gemini-embedding-001 (truncated to 768 dims).
+     * Populated asynchronously by {@link com.example.smartcatalog.service.ProductEmbeddingService}
+     * after each create/update. Null until the first embedding job completes.
+     */
+    @Convert(converter = VectorFloatConverter.class)
+    @Column(name = "embedding", columnDefinition = "vector(768)")
+    @org.hibernate.annotations.ColumnTransformer(read = "embedding::text", write = "?::vector")
+    private float[] embedding;
 
 }

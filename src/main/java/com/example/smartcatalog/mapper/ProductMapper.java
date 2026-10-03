@@ -43,7 +43,8 @@ public interface ProductMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "version", ignore = true)
-    @Mapping(target = "category", ignore = true) // resolved by service via categoryId
+    @Mapping(target = "category", ignore = true)  // resolved by service via categoryId
+    @Mapping(target = "embedding", ignore = true) // managed by ProductEmbeddingService
     Product toEntity(ProductDto dto);
 
     /**
@@ -60,6 +61,7 @@ public interface ProductMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "version", ignore = true)
-    @Mapping(target = "category", ignore = true) // resolved by service via categoryId
+    @Mapping(target = "category", ignore = true)  // resolved by service via categoryId
+    @Mapping(target = "embedding", ignore = true) // managed by ProductEmbeddingService
     void updateEntityFromDto(ProductDto dto, @MappingTarget Product entity);
 }

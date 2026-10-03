@@ -103,6 +103,30 @@ public class ProductController {
     }
 
     // -----------------------------------------------------------------------
+    // GET – semantic search
+    // -----------------------------------------------------------------------
+
+    /**
+     * Performs a semantic search using vector embeddings.
+     *
+     * @param query the search text (e.g. "comfy running shoes")
+     * @param maxPrice optional max price filter
+     * @return 200 OK with the top 10 matching {@link ProductDto}s
+     */
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> searchProducts(
+            @RequestParam String query,
+            @RequestParam(required = false) java.math.BigDecimal maxPrice
+    ) {
+        java.util.List<ProductDto> results = service.searchProducts(query, maxPrice);
+
+        return ApiResponseUtil.ok(
+                "Search completed successfully",
+                Map.of("products", results)
+        );
+    }
+
+    // -----------------------------------------------------------------------
     // POST – create
     // -----------------------------------------------------------------------
 

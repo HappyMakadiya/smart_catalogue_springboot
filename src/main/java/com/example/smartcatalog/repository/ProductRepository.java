@@ -5,8 +5,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -54,4 +58,67 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Override
     @EntityGraph(attributePaths = "category")
     Optional<Product> findById(Long id);
+
+    /**
+     * Returns the IDs of every product whose {@code embedding} column is {@code NULL}.
+     *
+     * <p>Used by the startup backfill runner to cheaply determine which products
+     * still need an embedding without loading full entity state.</p>
+     *
+     * @return list of product primary keys with no embedding (may be empty)
+     */
+    @Query("SELECT p.id FROM Product p WHERE p.embedding IS NULL")
+    List<Long> findIdsWithNullEmbedding();
+
+    /**
+     * Returns all products with a {@code NULL} embedding, eagerly fetching the
+     * {@code category} association in a single JOIN so that
+     * {@link com.example.smartcatalog.service.ProductEmbeddingService} can safely
+     * read {@code product.getCategory().getName()} on the detached entity without
+     * triggering a {@code LazyInitializationException}.
+     *
+     * @return list of products that still need embeddings
+     */
+    @EntityGraph(attributePaths = "category")
+    @Query("SELECT p FROM Product p WHERE p.embedding IS NULL")
+    List<Product> findAllWithNullEmbedding();
+
+    /**
+     * Writes only the {@code embedding} column of one product, bypassing the JPA merge
+     * (no extra SELECT, no version bump). Used by the bulk backfill.
+     *
+     * <p>{@code embedding IS NULL} guards against overwriting a fresher vector written
+     * by a concurrent {@code embedAndSave} after the product was edited mid-backfill.</p>
+     *
+     * @param id     the product primary key
+     * @param vector the embedding formatted as a pgvector string literal
+     * @return number of rows updated (0 if the product already had an embedding)
+     */
+    @Modifying
+    @Query(value = "UPDATE products SET embedding = CAST(:vector AS vector) " +
+                   "WHERE id = :id AND embedding IS NULL",
+           nativeQuery = true)
+    int updateEmbeddingIfMissing(@Param("id") Long id, @Param("vector") String vector);
+
+    /**
+     * Performs a semantic search for products using pgvector's cosine distance operator (<=>).
+     * 
+     * <p>A native query is required because JPQL does not natively support pgvector operators.
+     * We cast the provided string to a vector inside the query.</p>
+     * 
+     * @param vector the query embedding formatted as a pgvector string literal (e.g. "[0.1, 0.2, ...]")
+     * @param maxPrice optional maximum price filter (if null, price check is bypassed)
+     * @return the top 10 most semantically similar products
+     */
+    @Query(value = "SELECT * FROM products " +
+                   "WHERE (:maxPrice IS NULL OR price <= CAST(:maxPrice AS NUMERIC)) " +
+                    "AND (embedding <=> CAST(:vector AS vector)) < 0.4 " +
+                    "ORDER BY embedding <=> CAST(:vector AS vector) " +
+                   "LIMIT 10",
+           nativeQuery = true)
+    List<Product> searchBySimilarityAndPrice(
+            @org.springframework.data.repository.query.Param("vector") String vector,
+            @org.springframework.data.repository.query.Param("maxPrice") java.math.BigDecimal maxPrice);
 }
+
+
