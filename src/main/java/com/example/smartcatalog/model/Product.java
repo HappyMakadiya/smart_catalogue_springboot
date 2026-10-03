@@ -53,6 +53,7 @@ public class Product {
 
     @Version
     @Column(nullable = false)
+    @Builder.Default
     private Long version = 0L; // Enables Optimistic Locking
 
 }

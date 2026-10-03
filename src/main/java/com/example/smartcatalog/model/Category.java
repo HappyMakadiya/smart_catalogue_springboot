@@ -44,5 +44,6 @@ public class Category {
 
     @Version
     @Column(nullable = false)
+    @Builder.Default
     private Long version = 0L; // Enables Optimistic Locking
 }

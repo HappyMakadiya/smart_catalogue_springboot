@@ -1,5 +1,6 @@
 package com.example.smartcatalog.security;
 
+import com.example.smartcatalog.filter.RateLimitFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -39,6 +40,14 @@ public class SecurityConfig {
     @Autowired
     private UserDetailsService userDetailsService;
 
+    /**
+     * Rate-limit filter is applied <em>after</em> JWT authentication so that the
+     * Spring Security context is already populated. This lets the filter key by
+     * authenticated user ID rather than falling back to IP for all requests.
+     */
+    @Autowired
+    private RateLimitFilter rateLimitFilter;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -60,7 +69,10 @@ public class SecurityConfig {
                 .authenticationProvider(authenticationProvider())
 
                 // Insert JWT filter before Spring's built-in username/password filter
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+
+                // Rate-limit filter runs right after JWT auth — security context is set by now
+                .addFilterAfter(rateLimitFilter, JwtAuthenticationFilter.class);
 
         return http.build();
     }
