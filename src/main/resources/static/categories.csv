@@ -1,0 +1,51 @@
+﻿id,name,description,created_at,updated_at,version
+8,Electronics,"Gadgets, smart devices, home appliances, and high-tech accessories.",2026-09-27 18:44:21.888531,2026-09-27 18:44:21.888531,0
+9,Apparel & Fashion,"Trendy clothing, footwear, and fashion accessories for all ages.",2026-09-27 18:44:21.921156,2026-09-27 18:44:21.921156,0
+10,Home & Kitchen,"Furniture, decor, cookware, and everyday essential tools for the home.",2026-09-27 18:44:21.923718,2026-09-27 18:44:21.923718,0
+11,Books & Stationery,"Fiction, non-fiction, educational textbooks, notebooks, and writing supplies.",2026-09-27 18:44:21.924776,2026-09-27 18:44:21.924776,0
+12,Sports & Outdoors,"Exercise gear, athletic wear, camping equipment, and outdoor accessories.",2026-09-27 18:44:21.925605,2026-09-27 18:44:21.925605,0
+13,Beauty & Personal Care,"Skincare, makeup, hair care products, and grooming essentials.",2026-09-27 18:44:21.927065,2026-09-27 18:44:21.927065,0
+14,Toys & Games,"Fun toys, board games, puzzles, and educational play items for kids.",2026-09-27 18:44:21.928782,2026-09-27 18:44:21.928782,0
+15,Automotive,"Car accessories, replacement parts, tools, and maintenance supplies.",2026-09-27 18:44:21.929932,2026-09-27 18:44:21.929932,0
+16,Grocery & Gourmet Food,"Fresh produce, pantry staples, snacks, beverages, and specialty ingredients.",2026-09-27 18:44:21.930905,2026-09-27 18:44:21.930905,0
+17,Health & Household,"Vitamins, supplements, first aid supplies, and household cleaning products.",2026-09-27 18:44:21.9317,2026-09-27 18:44:21.9317,0
+18,Pet Supplies,"Food, toys, beds, grooming tools, and health products for household pets.",2026-09-27 18:44:21.9325,2026-09-27 18:44:21.9325,0
+19,Office Supplies,"Desk organizers, printer paper, ink cartridges, and essential office tools.",2026-09-27 18:44:21.933218,2026-09-27 18:44:21.933218,0
+20,Tools & Home Improvement,"Power tools, hardware, plumbing fixtures, and DIY renovation supplies.",2026-09-27 18:44:21.933987,2026-09-27 18:44:21.933987,0
+21,Baby Products,"Strollers, car seats, diapers, baby clothing, and nursery essentials.",2026-09-27 18:44:21.93479,2026-09-27 18:44:21.93479,0
+22,Jewelry & Watches,"Fine and fashion jewelry, luxury timepieces, and accessories.",2026-09-27 18:44:21.935795,2026-09-27 18:44:21.935795,0
+23,Handbags & Luggage,"Backpacks, suitcases, wallets, totes, and travel accessories.",2026-09-27 18:44:21.93772,2026-09-27 18:44:21.93772,0
+24,Footwear,"Athletic sneakers, formal dress shoes, casual sandals, and boots.",2026-09-27 18:44:21.938758,2026-09-27 18:44:21.938758,0
+25,Musical Instruments,"Guitars, keyboards, drums, audio interfaces, and studio equipment.",2026-09-27 18:44:21.939761,2026-09-27 18:44:21.939761,0
+26,Garden & Outdoor Living,"Plants, seeds, lawn mowers, patio furniture, and grilling gear.",2026-09-27 18:44:21.940544,2026-09-27 18:44:21.940544,0
+27,Smart Home Devices,"Voice assistants, smart plugs, security cameras, and automated lighting.",2026-09-27 18:44:21.941331,2026-09-27 18:44:21.941331,0
+28,Video Games,"Gaming consoles, latest game releases, controllers, and VR headsets.",2026-09-27 18:44:21.94206,2026-09-27 18:44:21.94206,0
+29,Movies & TV Shows,"Blu-ray discs, DVD collections, streaming gift cards, and merchandise.",2026-09-27 18:44:21.942883,2026-09-27 18:44:21.942883,0
+30,Art & Craft Supplies,"Paints, canvases, knitting yarn, scrapbooking tools, and DIY kits.",2026-09-27 18:44:21.943904,2026-09-27 18:44:21.943904,0
+31,Cameras & Photography,"DSLR cameras, lenses, tripods, action cameras, and studio lighting.",2026-09-27 18:44:21.945156,2026-09-27 18:44:21.945156,0
+32,Audio & Headphones,"Wireless earbuds, noise-canceling headphones, bluetooth speakers, and soundbars.",2026-09-27 18:44:21.946299,2026-09-27 18:44:21.946299,0
+33,Cell Phones & Accessories,"Smartphones, protective cases, screen protectors, and wireless chargers.",2026-09-27 18:44:21.947262,2026-09-27 18:44:21.947262,0
+34,Computers & Tablets,"Laptops, desktop PCs, tablets, monitors, and computer components.",2026-09-27 18:44:21.948049,2026-09-27 18:44:21.948049,0
+35,Software,"Antivirus programs, productivity suites, creative editing tools, and OS licenses.",2026-09-27 18:44:21.948888,2026-09-27 18:44:21.948888,0
+36,Industrial & Scientific,"Lab equipment, safety gear, 3D printing supplies, and material handling.",2026-09-27 18:44:21.949605,2026-09-27 18:44:21.949605,0
+37,Bicycles & Cycling,"Road bikes, mountain bikes, helmets, cycling apparel, and repair kits.",2026-09-27 18:44:21.950332,2026-09-27 18:44:21.950332,0
+38,Fitness & Yoga,"Yoga mats, resistance bands, dumbbells, and fitness trackers.",2026-09-27 18:44:21.951064,2026-09-27 18:44:21.951064,0
+39,Camping & Hiking,"Tents, sleeping bags, hiking backpacks, and portable cooking gear.",2026-09-27 18:44:21.951826,2026-09-27 18:44:21.951826,0
+40,Hunting & Fishing,"Fishing rods, reels, hunting apparel, and outdoor navigation tools.",2026-09-27 18:44:21.952565,2026-09-27 18:44:21.952565,0
+41,Baking & Pastry Essentials,"Flour, cake pans, decorating tips, and baking accessories.",2026-09-27 18:44:21.953349,2026-09-27 18:44:21.953349,0
+42,Bedding & Bath,"Luxury sheets, comforters, memory foam pillows, and bath towels.",2026-09-27 18:44:21.954071,2026-09-27 18:44:21.954071,0
+43,Lighting & Fans,"Ceiling fans, chandeliers, desk lamps, and energy-efficient LED bulbs.",2026-09-27 18:44:21.955118,2026-09-27 18:44:21.955118,0
+44,Wall Art & Decor,"Paintings, canvas prints, wall clocks, and decorative mirrors.",2026-09-27 18:44:21.955941,2026-09-27 18:44:21.955941,0
+45,Party Supplies,"Balloons, banners, tableware, and party favors for special occasions.",2026-09-27 18:44:21.956771,2026-09-27 18:44:21.956771,0
+46,Gifts & Greeting Cards,"Pop-up cards, curated gift baskets, wrapping paper, and unique souvenirs.",2026-09-27 18:44:21.957544,2026-09-27 18:44:21.957544,0
+47,Fitness Supplements,"Whey protein, pre-workouts, amino acids, and shakers.",2026-09-27 18:44:21.958323,2026-09-27 18:44:21.958323,0
+48,Maternity Wear,"Comfortable, stylish, and flexible clothing for expectant mothers.",2026-09-27 18:44:21.95931,2026-09-27 18:44:21.95931,0
+49,Vintage & Collectibles,"Rare coins, vintage comic books, action figures, and retro memorabilia.",2026-09-27 18:44:21.96219,2026-09-27 18:44:21.96219,0
+50,Eco-Friendly & Sustainable,"Reusable bags, bamboo products, biodegradable household goods.",2026-09-27 18:44:21.963907,2026-09-27 18:44:21.963907,0
+51,Travel & Adventure Gear,"Neck pillows, passport holders, packing cubes, and universal adapters.",2026-09-27 18:44:21.965135,2026-09-27 18:44:21.965135,0
+52,Board Games & Puzzles,"Strategic board games, family card games, and complex jigsaw puzzles.",2026-09-27 18:44:21.96612,2026-09-27 18:44:21.96612,0
+53,Smart Wearables,"Smartwatches, fitness bands, and wearable health monitors.",2026-09-27 18:44:21.966992,2026-09-27 18:44:21.966992,0
+54,Home Security & Safety,"Smoke detectors, safe lockers, smart locks, and video doorbells.",2026-09-27 18:44:21.968071,2026-09-27 18:44:21.968071,0
+55,Gourmet Coffee & Tea,"Whole bean coffee, loose-leaf teas, espresso makers, and frothers.",2026-09-27 18:44:21.974157,2026-09-27 18:44:21.974157,0
+56,Kids Fashion,"Bright, comfortable, and durable clothing for toddlers and young children.",2026-09-27 18:44:21.975468,2026-09-27 18:44:21.975468,0
+57,Home Fragrance,"Scented candles, essential oil diffusers, and room sprays.",2026-09-27 18:44:21.976404,2026-09-27 18:44:21.976404,0
