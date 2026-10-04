@@ -1,0 +1,803 @@
+{
+  "info": {
+    "name": "Smart Catalog API",
+    "description": "Postman collection for the Smart Catalog Spring Boot API.\n\n## Quick start\n1. Set `baseUrl` (default `http://localhost:8080`), `username` and `password` in the collection **Variables** tab.\n2. Run **Auth › Register** (first time) or **Auth › Login**.\n3. The JWT is stored in the `token` variable automatically (global + collection) and sent as `Authorization: Bearer {{token}}` by every other request — no manual copying.\n\n`categoryId` / `productId` are filled in automatically by the Create requests.\n\n## Notes\n- All JSON responses use the envelope `{ status_code, message, error, body }`.\n- Rate limit: 20 requests/minute per user (per IP when unauthenticated). Exceeding it returns **429** with `X-RateLimit-Retry-After-Seconds`.\n- A missing/expired token returns **403** — just run Login again.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if ((pm.response.code === 401 || pm.response.code === 403) && !pm.info.requestName.match(/Login|Register/)) {",
+          "    console.warn(\"Unauthorized — token missing or expired. Run Auth › Login to refresh {{token}}.\");",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "username",
+      "value": "testuser",
+      "type": "string"
+    },
+    {
+      "key": "password",
+      "value": "password123",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "categoryId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "productId",
+      "value": "1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "description": "Public endpoints (`/auth/**`) — no JWT required.\n\nBoth requests store the returned JWT in the `token` variable automatically, so every other request in this collection is authenticated without any manual copy/paste.",
+      "auth": {
+        "type": "noauth"
+      },
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Creates a new user (password stored as BCrypt hash) and returns a JWT — auto-login after register.\n\n- `username`: required\n- `password`: required, min 6 characters\n\nReturns **201** on success, **409** if the username is already taken (use **Login** instead).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Request succeeded\", function () {",
+                  "    pm.response.to.be.success;",
+                  "});",
+                  "",
+                  "// Response envelope: { status_code, message, error, body: { token, message } }",
+                  "const json = pm.response.json();",
+                  "const token = json && json.body && json.body.token;",
+                  "",
+                  "if (token) {",
+                  "    // Saved globally (as requested) and on the collection, so it wins over any",
+                  "    // stale collection-level value — every request then sends Bearer {{token}}.",
+                  "    pm.globals.set(\"token\", token);",
+                  "    pm.collectionVariables.set(\"token\", token);",
+                  "    console.log(\"JWT saved to {{token}}\");",
+                  "} else {",
+                  "    console.warn(\"No token found in response — token variable not updated.\");",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Authenticates existing credentials and returns a JWT.\n\nReturns **200** on success, **401** on invalid username/password.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Request succeeded\", function () {",
+                  "    pm.response.to.be.success;",
+                  "});",
+                  "",
+                  "// Response envelope: { status_code, message, error, body: { token, message } }",
+                  "const json = pm.response.json();",
+                  "const token = json && json.body && json.body.token;",
+                  "",
+                  "if (token) {",
+                  "    // Saved globally (as requested) and on the collection, so it wins over any",
+                  "    // stale collection-level value — every request then sends Bearer {{token}}.",
+                  "    pm.globals.set(\"token\", token);",
+                  "    pm.collectionVariables.set(\"token\", token);",
+                  "    console.log(\"JWT saved to {{token}}\");",
+                  "} else {",
+                  "    console.warn(\"No token found in response — token variable not updated.\");",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "User",
+      "description": "Protected endpoints that echo the authenticated user (`DemoController`). Useful to verify the JWT is valid.",
+      "item": [
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "profile"
+              ]
+            },
+            "description": "Returns the authenticated user's username and authorities."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Hello",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/hello",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "hello"
+              ]
+            },
+            "description": "Smoke test — returns a greeting if the JWT is valid."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Category",
+      "description": "Category CRUD + CSV seeding (`/api/category`). Requires JWT.",
+      "item": [
+        {
+          "name": "Create Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/category",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "category"
+              ]
+            },
+            "description": "Creates a new category. `name` is required and must be unique (409 on duplicate).\n\nThe created id is saved to `{{categoryId}}` for the other category/product requests. `{{$timestamp}}` keeps the name unique so this can be re-run.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sample Category {{$timestamp}}\",\n  \"description\": \"Category created from Postman.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "const json = pm.response.json();",
+                  "const id = json && json.body && json.body.category && json.body.category.id;",
+                  "",
+                  "if (id) {",
+                  "    pm.collectionVariables.set(\"categoryId\", id);",
+                  "    console.log(\"Saved category id to {{categoryId}}: \" + id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get All Categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/category?page=0&size=10&sort=name,asc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "category"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0",
+                  "description": "Zero-based page index (default 0)"
+                },
+                {
+                  "key": "size",
+                  "value": "10",
+                  "description": "Items per page (default 10)"
+                },
+                {
+                  "key": "sort",
+                  "value": "name,asc",
+                  "description": "field,direction — e.g. sort=name,desc (default name,asc)"
+                }
+              ]
+            },
+            "description": "Paginated list of categories. Supports standard Spring Data `page`, `size` and `sort` params."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Category By Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/category/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "category",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{categoryId}}",
+                  "description": "Category id"
+                }
+              ]
+            },
+            "description": "Fetches a single category. Returns **404** if not found."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Category",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/category/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "category",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{categoryId}}",
+                  "description": "Category id"
+                }
+              ]
+            },
+            "description": "Full update (PUT semantics) of an existing category. Returns **404** if not found, **409** on duplicate name.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Category {{$timestamp}}\",\n  \"description\": \"Category updated from Postman.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Seed Categories From CSV",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/category/seed",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "category",
+                "seed"
+              ]
+            },
+            "description": "Bulk-imports categories from a CSV file (multipart field `file`).\n\nRequired CSV headers: `name`, `description` (extra columns are ignored).\nSelect the CSV file in the **Body** tab before sending.\n\nResponds with a plain-text message (not the JSON envelope).",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [],
+                  "description": "CSV file to import"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Product",
+      "description": "Product CRUD, semantic search and CSV seeding (`/api/product`). Requires JWT.",
+      "item": [
+        {
+          "name": "Create Product",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/product",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "product"
+              ]
+            },
+            "description": "Creates a new product linked to `{{categoryId}}` (run **Category › Create Category** first, or set `categoryId` manually). Remove the `category` field to create an uncategorised product.\n\n- `name`: required\n- `price`: required, >= 0\n- `stock`: >= 0\n\nThe created id is saved to `{{productId}}`.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sample Product {{$timestamp}}\",\n  \"description\": \"Product created from Postman.\",\n  \"price\": \"199.99\",\n  \"stock\": 50,\n  \"category\": {\n    \"id\": {{categoryId}}\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "const json = pm.response.json();",
+                  "const id = json && json.body && json.body.product && json.body.product.id;",
+                  "",
+                  "if (id) {",
+                  "    pm.collectionVariables.set(\"productId\", id);",
+                  "    console.log(\"Saved product id to {{productId}}: \" + id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get All Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/product?page=0&size=10&sort=name,asc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "product"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0",
+                  "description": "Zero-based page index (default 0)"
+                },
+                {
+                  "key": "size",
+                  "value": "10",
+                  "description": "Items per page (default 10)"
+                },
+                {
+                  "key": "sort",
+                  "value": "name,asc",
+                  "description": "field,direction — e.g. sort=price,desc (default name,asc)"
+                }
+              ]
+            },
+            "description": "Paginated list of products with their categories. Supports `page`, `size` and `sort` params."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Product By Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/product/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "product",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{productId}}",
+                  "description": "Product id"
+                }
+              ]
+            },
+            "description": "Fetches a single product. Returns **404** if not found."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Search Products (Semantic)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/product/search?query=comfy running shoes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "product",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "comfy running shoes",
+                  "description": "Search text (required)"
+                },
+                {
+                  "key": "maxPrice",
+                  "value": "500",
+                  "description": "Optional max price filter",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Semantic search using Gemini vector embeddings — returns the top 10 matches.\n\n- `query`: required, free text\n- `maxPrice`: optional upper price limit (enable it to filter)"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Product",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/product/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "product",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{productId}}",
+                  "description": "Product id"
+                }
+              ]
+            },
+            "description": "Full update (PUT semantics) of an existing product. Returns **404** if the product or category is not found.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Product {{$timestamp}}\",\n  \"description\": \"Product updated from Postman.\",\n  \"price\": \"229.99\",\n  \"stock\": 35,\n  \"category\": {\n    \"id\": {{categoryId}}\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Seed Products From CSV",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/product/seed",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "product",
+                "seed"
+              ]
+            },
+            "description": "Bulk-imports products from a CSV file (multipart field `file`).\n\nRequired CSV headers: `name`, `description`, `price`, `stock`, `category_id` (category ids must already exist; extra columns are ignored).\nSelect the CSV file in the **Body** tab before sending.\n\nResponds with a plain-text message (not the JSON envelope).",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [],
+                  "description": "CSV file to import"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
